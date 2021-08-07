@@ -1,55 +1,43 @@
-# Copyright (c) 2018-2019 The Linux Foundation. All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted (subject to the limitations in the
-# disclaimer below) provided that the following conditions are met:
-#
-#    * Redistributions of source code must retain the above copyright
-#      notice, this list of conditions and the following disclaimer.
-#
-#    * Redistributions in binary form must reproduce the above
-#      copyright notice, this list of conditions and the following
-#      disclaimer in the documentation and/or other materials provided
-#      with the distribution.
-#
-#    * Neither the name of The Linux Foundation nor the names of its
-#      contributors may be used to endorse or promote products derived
-#      from this software without specific prior written permission.
-#
-# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE
-# GRANTED BY THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT
-# HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
-# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-# IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# mount point	     fstype	 device					device2				                        flags
 
-# Android fstab file.
-# The filesystem that contains the filesystem checker binary (typically /system) cannot
-# specify MF_CHECK, and must come before any filesystems that do specify MF_CHECK
+/boot		           emmc	   /dev/block/bootdevice/by-name/boot					          flags=slotselect
 
-#<src>                                                 <mnt_point>            <type>  <mnt_flags and options>                            <fs_mgr_flags>
-system                                                  /system                ext4    ro,barrier=1,discard                                 wait,slotselect,avb=vbmeta_system,logical,first_stage_mount,avb_keys=/avb/q-gsi.avbpubkey
-product                                                 /product               ext4    ro,barrier=1,discard                                 wait,slotselect,avb=vbmeta_system,logical,first_stage_mount
-vendor                                                  /vendor                ext4    ro,barrier=1,discard                                 wait,slotselect,avb,logical,first_stage_mount
-odm                                                     /odm                   ext4    ro,barrier=1,discard                                 wait,slotselect,avb,logical,first_stage_mount
-/dev/block/by-name/metadata                             /metadata              ext4    noatime,nosuid,nodev,discard                         wait,formattable,wrappedkey,first_stage_mount
-/dev/block/bootdevice/by-name/userdata                  /data                  f2fs    noatime,nosuid,nodev,discard,reserve_root=32768,resgid=1065,fsync_mode=nobarrier,inlinecrypt     latemount,wait,check,formattable,fileencryption=ice,wrappedkey,quota,reservedsize=128M,sysfs_path=/sys/devices/platform/soc/1d84000.ufshc,checkpoint=fs
-/dev/block/bootdevice/by-name/persist                   /mnt/vendor/persist    ext4    noatime,nosuid,nodev,barrier=1,discard               wait,check
-/dev/block/bootdevice/by-name/misc                      /misc                  emmc    defaults                                             defaults
-/devices/platform/soc/8804000.sdhci/mmc_host*           /storage/sdcard1       vfat    nosuid,nodev                                         wait,voldmanaged=sdcard1:auto
-/devices/platform/soc/1da4000.ufshc_card/host*          /storage/sdcard1       vfat    nosuid,nodev                                         wait,voldmanaged=sdcard1:auto
-/devices/platform/soc/*.ssusb/*.dwc3/xhci-hcd.*.auto*   /storage/usbotg        vfat    nosuid,nodev                                         wait,voldmanaged=usbotg:auto
-/dev/block/bootdevice/by-name/spunvm                    /mnt/vendor/spunvm     vfat    rw,noatime,shortname=lower,uid=1000,gid=1000,dmask=007,fmask=007,context=u:object_r:spunvm_file:s0 wait
-/dev/block/bootdevice/by-name/modem                     /vendor/firmware_mnt   vfat    ro,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337,context=u:object_r:firmware_file:s0 wait,slotselect
-/dev/block/bootdevice/by-name/dsp                       /vendor/dsp            ext4    ro,nosuid,nodev,barrier=1                            wait,slotselect
-/dev/block/bootdevice/by-name/bluetooth                 /vendor/bt_firmware    vfat    ro,shortname=lower,uid=1002,gid=3002,dmask=227,fmask=337,context=u:object_r:bt_firmware_file:s0 wait,slotselect
-/dev/block/bootdevice/by-name/mdm1m9kefs1               /modem_fs1             emmc    defaults                                             defaults
-/dev/block/bootdevice/by-name/mdm1m9kefs2               /modem_fs2             emmc    defaults                                             defaults
+# Dynamic Partitions
+/system_root       ext4	   /dev/block/mapper/system                             flags=slotselect;display="System_Root"
+/vendor            ext4    /dev/block/mapper/vendor                             flags=slotselect;display="Vendor"
+/product           ext4    /dev/block/mapper/product                            flags=slotselect;display="Product"
+/odm               ext4    /dev/block/mapper/odm                                flags=slotselect;display="OEM"
 
+/system_image      emmc	   /dev/block/mapper/system                             flags=slotselect;backup=1;display="System_Root";flashimg=1
+/vendor_image      emmc    /dev/block/mapper/vendor                             flags=slotselect;backup=1;display="Vendor";flashimg=1
+/product_image     emmc    /dev/block/mapper/product                            flags=slotselect;backup=1;display="Product";flashimg=1
+/odm_image         emmc    /dev/block/mapper/odm                                flags=slotselect;backup=1;display="OEM";flashimg=1
+
+
+# AVB partitions
+/dtbo			         emmc	   /dev/block/bootdevice/by-name/dtbo									  flags=slotselect;display="DTBO";backup=1;flashimg=1
+/vbmeta			       emmc	   /dev/block/bootdevice/by-name/vbmeta							    flags=slotselect;display="VBMeta";backup=1;flashimg=1
+/vbmeta_system	   emmc	   /dev/block/bootdevice/by-name/vbmeta_system					flags=slotselect;display="VBMeta System";backup=1;flashimg=1
+
+
+/super            emmc     /dev/block/bootdevice/by-name/super                  flags=display="Super";backup=1;flashimg=1
+/metadata	        ext4	   /dev/block/bootdevice/by-name/metadata 					
+/data		          f2fs	   /dev/block/bootdevice/by-name/userdata					      flags=fileencryption=ice:aes-256-cts;wrappedkey;keydirectory=/metadata/vold/metadata_encryption
+
+/recovery	        emmc	   /dev/block/platform/bootdevice/by-name/recovery      flags=display="Recovery";backup=1;flashimg=1
+/persist          ext4     /dev/block/platform/bootdevice/by-name/persist       flags=display="Persist";backup=1
+/persist_image    emmc     /dev/block/platform/bootdevice/by-name/persist       flags=backup=1;display="Persist Image";flashimg=1
+
+/firmware	         vfat	    /dev/block/bootdevice/by-name/modem					         flags=slotselect;display="Firmware";mounttodecrypt;fsflags=ro
+/misc		          emmc	   /dev/block/bootdevice/by-name/misc
+/modem		        emmc	   /dev/block/bootdevice/by-name/modem					        flags=slotselect;backup=1;display="Modem"
+/bluetooth	      emmc	   /dev/block/bootdevice/by-name/bluetooth					    flags=slotselect;backup=1;subpartitionof=/modem
+/dsp		          emmc	   /dev/block/bootdevice/by-name/dsp					          flags=slotselect;backup=1;subpartitionof=/modem
+/efs1		          emmc	   /dev/block/bootdevice/by-name/modemst1					      flags=backup=1;display="EFS"
+/efs2		          emmc	   /dev/block/bootdevice/by-name/modemst2					      flags=backup=1;subpartitionof=/efs1
+/efsc		          emmc	   /dev/block/bootdevice/by-name/fsc					          flags=backup=1;subpartitionof=/efs1
+/efsg		          emmc	   /dev/block/bootdevice/by-name/fsg					          flags=backup=1;subpartitionof=/efs1
+
+# Removable storage
+/external_sd	    auto	/dev/block/mmcblk0p1			/dev/block/mmcblk1		        flags=display="MicroSD";storage;wipeingui;removable
+/usb_otg	        vfat	/dev/block/sda1				    /dev/block/sda			          flags=display="USB-OTG";storage;wipeingui;removable
